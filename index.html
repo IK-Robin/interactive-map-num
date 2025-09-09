@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>interactive map</title>
+    <style>
+        .ikr_rv_detail {
+            /* pointer-events: none; */
+            width: max-content;
+            max-width: 240px;
+            /* min-width: 150px; */
+            z-index: 5;
+            max-height: max-content;
+            height: auto;
+            flex-shrink: 0;
+            margin: 20px auto;
+            overflow-wrap: break-word;
+            display: none;
+            position: absolute;
+            background: #fff;
+            padding: 0;
+
+            border-radius: 3px;
+            box-shadow: 0 16px 24px 2px #00000024, 0 6px 30px 5px #0000001f,
+                0 8px 10px #0000004d, 0 0 0 1px #0003;
+
+            z-index: 10000;
+        }
+
+        .ikr_rv_detail::after {
+            content: "";
+            position: absolute;
+            width: 0;
+            height: 0;
+            margin-left: -10px;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            transform: rotate(var(--rotate_value));
+        }
+
+        .ikr_detail_img img {
+            width: 100%;
+            height: auto;
+            max-height: 160px;
+        }
+
+        .map_details {
+            text-align: center;
+            padding: 2px 8px 6px;
+            color: #262323;
+        }
+
+        #detail_name {
+            font-size: 16px;
+            margin: 0 0 2px;
+            color: #669933;
+        }
+
+        .ikr_detail_img {
+            width: 100%;
+            background: #fff;
+            overflow: hidden;
+            max-height: 100%;
+            margin: 0px auto 0;
+            max-height: 200px;
+        }
+
+        .map_title {
+            color: #262323;
+            text-align: center;
+            font-family: Roboto;
+            font-size: 18px;
+            font-style: normal;
+            font-weight: 700;
+            line-height: normal;
+            margin: 0 auto;
+            padding-bottom: 5px;
+            padding-top: 5px;
+        }
+
+        .detail_des {
+            color: #262323;
+            text-align: left;
+            font-family: Roboto;
+            font-size: 16px;
+            line-height: 20px;
+            margin-bottom: 2px !important;
+            ;
+            margin: 0;
+            padding-bottom: 0px;
+            padding:0 5px;
+        }
+
+        .detail_des ul {
+            position: relative;
+            list-style: none;
+            margin: 0;
+            padding-left: 22px;
+        }
+
+        .detail_des ul li {
+            position: relative;
+            margin-bottom: 3px;
+        }
+
+        .detail_des ul li::before {
+            content: "";
+            position: absolute;
+            width: 7px;
+            height: 7px;
+            /* color: green; */
+            left: -17px;
+            background-color: green;
+            top: 6px;
+            text-align: center;
+        }
+
+        #ikr_price {
+            margin: 0 auto;
+            width: max-content;
+        }
+
+        #plotId {
+            text-transform: uppercase;
+
+        }
+
+        /* #ikr_btnTxt {
+	color: white;
+	text-decoration: none;
+	text-transform: capitalize;
+	background-color: green;
+	border: none;
+	padding: 5px 20px;
+	border-radius: 50px;
+	display: block;
+} */
+
+        #ikr_btnTxt {
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.15s ease-in-out,
+                border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+            -webkit-user-select: none;
+            user-select: none;
+            white-space: nowrap;
+            background: #1cbb64;
+            border: 1px solid #1cbb64;
+            box-shadow: 0 1px 1px #0000001f;
+            color: #fff;
+            font-weight: 700;
+            border-radius: 3px;
+            font-size: 1rem;
+            margin-top: 10px;
+            min-width: 110px;
+            padding: 4px 16px;
+            display: block;
+            margin-bottom: 5px;
+          text-decoration: none;
+        }
+
+        #ikr_btnTxt:hover {
+            background: #19a558;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .ikr_map_tooltip_button {
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.15s ease-in-out,
+                border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+            white-space: nowrap;
+            background: green;
+            border: #1cbb64 solid 1px;
+            box-shadow: 0 1px 1px #0000001f;
+            color: #fff;
+            font-weight: 700;
+            border-radius: 3px;
+            font-size: 1rem;
+
+            min-width: 110px;
+            padding: 4px 16px;
+            width: max-content;
+            text-align: center;
+            margin: 10px auto 0;
+        }
+
+        .ikr_map_tooltip {
+            position: absolute;
+            display: none;
+            width: max-content;
+            font-size: 18px;
+            text-align: center;
+            background: white;
+            padding: 10px 15px;
+            z-index: 5;
+            height: auto;
+            line-height: 9px;
+            margin: 0 auto;
+            color: #21669e;
+            border-radius: 5px;
+            box-shadow: 0 0 0 1px #eee;
+            transform: translate(-40%, 40%);
+            text-transform: uppercase;
+            font-weight: 400;
+            z-index: 55;
+        }
+
+
+        .ikr_mapDetail {
+
+            text-align: center;
+            text-transform: capitalize;
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 26px;
+
+        }
+
+        @media screen and (max-width: 667px) {
+            .ikr_rv_detail {
+                max-width: 170px;
+                min-width: 121px;
+            }
+
+            .map_details {
+                padding: 0px 0px 12px;
+            }
+
+            .detail_des {
+                padding-bottom: 0px;
+            }
+
+            .detail_des ul {
+                margin: 0;
+                padding-left: 20px;
+            }
+
+            .detail_des ul li::before {
+                width: 7px;
+                height: 7px;
+                left: -13px;
+                top: 7px;
+            }
+
+            .detail_des ul li {
+                font-size: 11px;
+                line-height: 16px;
+            }
+
+            /* .detail_des ul li:nth-child(2) {
+                display: none;
+            }
+
+            .detail_des ul li:nth-child(3) {
+                display: none;
+            }
+
+            .detail_des ul li:nth-child(4) {
+                display: none;
+            }
+
+            .detail_des ul li:nth-child(5) {
+                display: none;
+            }
+
+            .detail_des ul li:nth-child(6) {
+                display: none;
+            }
+
+            .detail_des ul li:nth-child(7) {
+                display: none;
+            }
+
+            .detail_des ul li:nth-child(8) {
+                display: none;
+            } */
+
+            .map_title {
+                font-size: 14px;
+            }
+
+            .ikr_map_tooltip_button {
+                font-size: 13px;
+            }
+
+            #ikr_price {
+                font-size: 14px;
+                padding-bottom: 0;
+                margin-bottom: 0;
+            }
+
+            .ikr_detail_img {
+                margin: 0px auto 0;
+                max-height: 100px;
+            }
+
+            #ikr_btnTxt {
+                padding: 2px 4px;
+                display: inline-block;
+                margin: 0 auto;
+            }
+
+            .ikr_map_tooltip {
+                font-size: 12px;
+                padding: 8px 7px;
+            }
+        }
+
+        @media screen and (max-width:467px) {
+            .ikr_rv_detail {
+                max-width: 130px;
+                min-width: 121px;
+            }
+
+            .ikr_mapDetail {
+                line-height: 16px;
+                font-size: 11px;
+                padding: 0 3px;
+                height: 47px;
+                overflow: hidden;
+
+            }
+
+            .map_title {
+                font-size: 11px;
+            }
+
+            #ikr_btnTxt {
+                padding: 2px 13px;
+                display: inline-block;
+                margin: 0 auto;
+                font-size: 16px;
+                min-width: max-content;
+            }
+        }
+
+
+        .newh {
+            width: 100%;
+            height: 5000px;
+            background-color: red;
+        }
+
+        .ikr_map5 {
+            position: relative;
+        }
+
+        .ikr_mapDetail {
+            line-height: 21px;
+            font-size: 11px;
+            padding: 0 3px;
+        }
+
+        #Plot_8{
+            stroke: #fff;
+        }
+        .map_container {
+            position:relative;
+            overflow:hidden;
+        }
+       
+    </style>
+</head>
+<body>
+    <!-- <div style="margin-top: 500px; height: 400px; width: 40px; background-color: red;"></div> -->
+   <div class="dd" style="position:relative;" >
+    <div class="map_container property">
+
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="ikr_svg" xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1059.12 984">
+    <defs>
+        <style>.cls-1{fill:#87a3ae;opacity:0;}</style>
+    </defs>
+    <g id="Layer_1">
+        <image width="4413" height="4100" transform="scale(.24)" xlink:href="2025 CN HEADQUARTERS MAP V1-01 (1)-01.png"/>
+    </g>
+    <g id="building_copy">
+        <polygon id="ap_2500" class="cls-1" points="71.15 274.96 48.9 275.04 48.78 254.14 71.03 254.06 71.15 274.96"/>
+        <rect id="ap_2100" class="cls-1" x="387.92" y="196.34" width="8.43" height="17.43"/>
+        <rect id="ap_2000" class="cls-1" x="408.97" y="205.67" width="17.21" height="29.91"/>
+        <rect id="ap_1800" class="cls-1" x="400.29" y="295.51" width="29" height="24.59"/>
+        <polygon id="ap_1500" class="cls-1" points="816.37 439.9 807.01 460.32 791.45 453.16 800.81 432.73 816.37 439.9"/>
+        <rect id="ap_1400" class="cls-1" x="837.49" y="433.94" width="12.59" height="25.17" transform="translate(313.12 1240.1) rotate(-84.12)"/>
+        <polygon id="ap_1300" class="cls-1" points="958.23 444.88 931.34 447.78 928.31 419.46 955.2 416.55 958.23 444.88"/>
+        <polygon id="ap_1200" class="cls-1" points="985.56 480.25 985.56 498.82 977.15 498.82 977.15 507.76 958.17 507.76 958.17 498.82 934.09 498.82 934.09 490.86 934.08 489.76 932.32 489.76 932.32 485.28 934.09 485.28 934.09 480.25 943.4 480.25 943.4 476.76 951.32 476.76 951.32 480.25 985.56 480.25"/>
+        <rect id="ap_1000" class="cls-1" x="865.67" y="544.61" width="31.87" height="14.51"/>
+        <rect id="ap_800" class="cls-1" x="808.35" y="636.28" width="23.04" height="10.23"/>
+        <rect id="ap_700" class="cls-1" x="861.19" y="628.2" width="50.43" height="14.16"/>
+        <rect id="ap_1100" class="cls-1" x="952.24" y="518.57" width="13.44" height="18.54"/>
+        <rect id="ap_900" class="cls-1" x="957.04" y="664.45" width="15.57" height="13.83" transform="translate(-13.14 1323.46) rotate(-68.53)"/>
+        <polygon id="ap_400" class="cls-1" points="962.09 708.37 945.93 744.21 918.87 731.08 925.21 717.3 916.95 713.15 926.52 692.14 962.09 708.37"/>
+        <polygon id="ap_200" class="cls-1" points="933.74 751.92 923.91 773.23 914.11 768.69 923.94 747.38 933.74 751.92"/>
+        <path id="ap_c4" class="cls-1" d="m785.39,755.85c0,17.9-14.51,32.42-32.42,32.42-8.95,0-17.05-3.63-22.92-9.5-5.86-5.86-9.49-13.97-9.49-22.92s3.63-17.06,9.49-22.92,13.97-9.5,22.92-9.5,17.06,3.63,22.93,9.5,9.49,13.97,9.49,22.92Z"/>
+        <path id="ap_c2" class="cls-1" d="m887.5,875.93c0,6.92-5.6,12.53-12.52,12.53-3.46,0-6.59-1.4-8.86-3.67-2.26-2.27-3.66-5.4-3.66-8.86s1.4-6.58,3.66-8.85c2.27-2.27,5.4-3.67,8.86-3.67s6.59,1.4,8.86,3.67c2.26,2.27,3.66,5.39,3.66,8.85Z"/>
+        <rect id="ap_500" class="cls-1" x="857" y="693.92" width="34.2" height="44.18"/>
+        <rect id="ap_300" class="cls-1" x="857.17" y="787.54" width="18.23" height="22.15"/>
+        <rect id="ap_c1" class="cls-1" x="861.62" y="744.2" width="20.52" height="38.69"/>
+        <polygon id="ap_600" class="cls-1" points="764.18 842.46 764.18 859.99 729.1 859.99 729.1 844.5 736.63 844.5 736.63 849.72 749.41 849.72 749.41 842.46 764.18 842.46"/>
+        <rect id="ap_1900" class="cls-1" x="408.97" y="237.49" width="17.21" height="17.29"/>
+        <polygon id="ap_c3" class="cls-1" points="903.63 781.7 896.77 796.54 891.87 794.27 886.97 792 893.83 777.16 898.73 779.43 903.63 781.7"/>
+        <polygon id="ap_100" class="cls-1" points="919.59 777.18 917.43 781.86 915.06 786.99 903.63 781.7 898.73 779.43 893.83 777.16 884 772.61 886.37 767.48 888.53 762.8 898.36 767.35 905.47 751.95 910.37 754.22 915.27 756.49 908.16 771.89 919.59 777.18"/>
+        <polygon id="ap_2400" class="cls-1" points="302.42 212.16 302.51 222.97 283.68 223.02 283.52 189.64 292.91 189.61 302.31 189.58 302.42 212.15 302.42 212.16"/>
+        <polygon id="ap_2300" class="cls-1" points="317.03 222.93 317.1 239.27 311.7 239.29 306.3 239.31 306.23 222.96 302.51 222.97 293.08 223 293.08 222.99 293.05 217.35 293.03 212.19 302.42 212.16 302.47 212.16 306.19 212.15 306.12 195.19 311.52 195.17 316.92 195.16 316.99 212.12 328.71 212.08 328.73 217.24 328.76 222.89 317.03 222.93"/>
+    </g>
+</svg>
+    </div>
+         
+        <div class="ikr_rv_detail" id="ikr_rv_detail">
+            <div style="position: relative">
+              <div id="detail_img" class="ikr_detail_img">
+                <img src="" alt="" id="map_img" />
+              </div>
+              <div class="map_details">
+                <p id="plotId" class="map_title"></p>
+    
+                <div id="detail_des" class="detail_des"></div>
+    
+                <a
+                  id="ikr_btnTxt"
+                  class="ikr_map_tooltip_button"
+                  target="_blank"
+                  href=""
+                >
+                  Details</a
+                >
+              </div>
+            </div>
+          </div>
+          <div class="ikr_map_tooltip" id="ikr_map_tooltip"></div>
+    </div>
+    
+    
+    <script>
+        // ====== Your data (unchanged) ======
+const lotDetails = [{
+        "id": "ap_100",
+        "building_img": "./images/ICW 1400.webp",
+        "department_name": "Tribal Administrator",
+        "website_link": "https://www.comanchenation.com/administrative-programs/page/administration"
+    },
+    {
+        "id": "ap_100",
+        "building_img": "./images/",
+        "department_name": "Comanche Business Committee",
+        "website_link": "https://www.comanchenation.com/bc-business"
+    },
+    {
+        "id": "ap_100",
+        "building_img": "./images/",
+        "department_name": "Comanche Nation Chairman",
+        "website_link": "https://www.comanchenation.com/bc-business/page/chairman"
+    },
+    {
+        "id": "ap_100",
+        "building_img": "./images/",
+        "department_name": "Vocational Rehabilitation",
+        "website_link": "https://www.comanchenation.com/education-employment/page/vocational-rehabilitation"
+    },
+    {
+        "id": "ap_100",
+        "building_img": "./images/",
+        "department_name": "Children & Youth Services",
+        "website_link": "https://www.comanchenation.com/children-youth-services/page/youth-services"
+    },
+    {
+        "id": "ap_100",
+        "building_img": "./images/",
+        "department_name": "Election Board",
+        "website_link": "https://www.comanchenation.com/government/page/election-office"
+    },
+    {
+        "id": "ap_100",
+        "building_img": "./images/",
+        "department_name": "Grants Management",
+        "website_link": "https://www.comanchenation.com/administrative-programs/page/grants"
+    },
+    {
+        "id": "ap_100",
+        "building_img": "./images/",
+        "department_name": "Compliance",
+        "website_link": "https://www.comanchenation.com/administrative-programs/page/compliance"
+    },
+    {
+        "id": "ap_100",
+        "building_img": "./images/",
+        "department_name": "Finance",
+        "website_link": "https://www.comanchenation.com/administrative-programs/page/finance"
+    },
+    {
+        "id": "ap_200",
+        "building_img": "./images/HR 200.webp",
+        "department_name": "Human Resources",
+        "website_link": "https://www.comanchenation.com/administrative-programs/page/human-resources"
+    },
+    {
+        "id": "ap_200",
+        "building_img": "./images/",
+        "department_name": "Records",
+        "website_link": "https://www.comanchenation.com/administrative-programs/page/records-request"
+    },
+    {
+        "id": "ap_300",
+        "building_img": "./images/Social Services 300.webp",
+        "department_name": "WIOA",
+        "website_link": "https://www.comanchenation.com/education-employment/page/workforce-wioa"
+    },
+    {
+        "id": "ap_300",
+        "building_img": "./images/",
+        "department_name": "Social Services",
+        "website_link": "https://www.comanchenation.com/general-services/page/social-services"
+    },
+    {
+        "id": "ap_400",
+        "building_img": "./images/Enrollment 400.webp",
+        "department_name": "IT / Media",
+        "website_link": "https://www.comanchenation.com/communications/page/n%CA%89m%CA%89-tekwar%CA%89-comanche-talk-podcast"
+    },
+    {
+        "id": "ap_400",
+        "building_img": "./images/",
+        "department_name": "Comanche Code Talker Conference Room",
+        "website_link": ""
+    },
+    {
+        "id": "ap_400",
+        "building_img": "./images/",
+        "department_name": "Information Technology (IT)",
+        "website_link": "https://www.comanchenation.com/administrative-programs/page/information-technology"
+    },
+    {
+        "id": "ap_400",
+        "building_img": "./images/",
+        "department_name": "Public Information Office (PIO)",
+        "website_link": "https://www.comanchenation.com/communications/page/public-information-office-pio"
+    },
+    {
+        "id": "ap_400",
+        "building_img": "./images/",
+        "department_name": "Enrollment Department",
+        "website_link": "https://www.comanchenation.com/administrative-programs/page/enrollment"
+    },
+    {
+        "id": "ap_500",
+        "building_img": "./images/Watchetaker Hall 500.webp",
+        "department_name": "Watchetaker Hall Events",
+        "website_link": ""
+    },
+    {
+        "id": "ap_500",
+        "building_img": "",
+        "department_name": "Lil Darlin's Home Cooking",
+        "website_link": ""
+    },
+    {
+        "id": "ap_600",
+        "building_img": "./images/Transit 600 .webp",
+        "department_name": "Transit",
+        "website_link": "https://www.comanchenation.com/general-services/page/transit"
+    },
+    {
+        "id": "ap_700",
+        "building_img": "./images/CN Court House 700.webp",
+        "department_name": "Court Room",
+        "website_link": "https://www.comanchenation.com/government/page/tribal-court"
+    },
+    {
+        "id": "ap_700",
+        "building_img": "./images/",
+        "department_name": "Court Clerk",
+        "website_link": "https://www.comanchenation.com/government/page/tribal-court"
+    },
+    {
+        "id": "ap_700",
+        "building_img": "./images",
+        "department_name": "Probation",
+        "website_link": "https://www.comanchenation.com/government/page/tribal-court"
+    },
+    {
+        "id": "ap_800",
+        "building_img": "./images/Child Care 800.webp",
+        "department_name": "Child Care",
+        "website_link": "https://www.comanchenation.com/children-youth-services/page/child-care-programs-subsidy-assistance"
+    },
+    {
+        "id": "ap_900",
+        "building_img": "./images/Grasshoppers 900.webp",
+        "department_name": "Grass Hoppers",
+        "website_link": "https://www.comanchenation.com/elder-services/page/grasshoppers"
+    },
+    {
+        "id": "ap_1000",
+        "building_img": "./images/Maintenance 1000.webp",
+        "department_name": "Maintenance Department",
+        "website_link": "https://www.comanchenation.com/administrative-programs/page/maintenance"
+    },
+    {
+        "id": "ap_1100",
+        "building_img": "./images/Capital Improvement 1100.webp",
+        "department_name": "Capital Improvement Program (CIP)",
+        "website_link": "https://www.comanchenation.com/administrative-programs/page/capital-improvement"
+    },
+    {
+        "id": "ap_1200",
+        "building_img": "./images/Food Distribution 1200.webp",
+        "department_name": "Food Distribution",
+        "website_link": "https://www.comanchenation.com/general-services/page/food-distribution"
+    },
+    {
+        "id": "ap_1300",
+        "building_img": "./images/Transportation 1300.webp",
+        "department_name": "Transportation Department",
+        "website_link": "https://www.comanchenation.com/general-services/page/transportation"
+    },
+    {
+        "id": "ap_1400",
+        "building_img": "./images/ICW 1400.webp",
+        "department_name": "Indian Child Welfare (ICW)",
+        "website_link": "https://www.comanchenation.com/children-youth-services/page/indian-child-welfare"
+    },
+    {
+        "id": "ap_1500",
+        "building_img": "./images/Child Support 1500.webp",
+        "department_name": "Child Support",
+        "website_link": "https://www.comanchenation.com/children-youth-services/page/child-support-enforcement-cse"
+    },
+    {
+        "id": "ap_1800",
+        "building_img": "./images/Property 1800.webp",
+        "department_name": "Property",
+        "website_link": "https://www.comanchenation.com/administrative-programs/page/property-procurement"
+    },
+    {
+        "id": "ap_1900",
+        "building_img": "./images/Fire Department 1900 .webp",
+        "department_name": "Fire Department",
+        "website_link": "https://www.comanchenation.com/emergency-services/page/fireems"
+    },
+    {
+        "id": "ap_1900",
+        "building_img": "./images/ ",
+        "department_name": "MMIP Missing & Murdered Indigenous People",
+        "website_link": "https://www.comanchenation.com/emergency-services/page/missing-and-murdered-indigenous-people"
+    },
+    {
+        "id": "ap_1900",
+        "building_img": "",
+        "department_name": "Emergency Management",
+        "website_link": "https://www.comanchenation.com/emergency-services/page/emergency-management"
+    },
+    {
+        "id": "ap_2100",
+        "building_img": "./images/BIA 2100.webp",
+        "department_name": "BIA Office",
+        "website_link": ""
+    },
+    {
+        "id": "ap_2000",
+        "building_img": "./images/Police Department 2000.webp",
+        "department_name": "Comanche Nation Police Department",
+        "website_link": "https://www.comanchenation.com/emergency-services/page/law-enforcement"
+    },
+    {
+        "id": "ap_2300",
+        "building_img": "./images/Prevention and Recovery 2300.webp",
+        "department_name": "Prevention & Recovery",
+        "website_link": "https://www.comanchenation.com/health-wellness/page/prevention-and-recovery"
+    },
+    {
+        "id": "ap_2400",
+        "building_img": "./images/New Pathways 2400 .webp",
+        "department_name": "New Pathways",
+        "website_link": "https://www.comanchenation.com/health-wellness/page/new-pathways"
+    },
+    {
+        "id": "ap_2500",
+        "building_img": "./images/EPA 2500.webp",
+        "department_name": "Office of Environmental Programs",
+        "website_link": "https://www.comanchenation.com/general-services/page/office-environmental-programs"
+    },
+    {
+        "id": "ap_c1",
+        "building_img": "./images/CIVA Court CN001.webp",
+        "department_name": "Comanche Indian Veterans Association (CIVA) Court Of Honor & Tahsequah Garden",
+        "website_link": ""
+    },
+    {
+        "id": "ap_c2",
+        "building_img": "./images/Comanche War Scouts COH CN002.webp",
+        "department_name": "Comanche War Scouts Circle of Honor - A Tribute To Our Fallen Warriors",
+        "website_link": ""
+    },
+     {
+        "id": "ap_c3",
+        "building_img": "./images/Patriot Room C3.webp",
+        "department_name": "Comanche Veterans Patriot Room",
+        "website_link": ""
+    },
+     {
+        "id": "ap_c4",
+        "building_img": "./images/fair cover img.webp",
+        "department_name": "Comanche Nation Powwow Arena",
+        "website_link": ""
+    },
+     {
+        "id": "ap_c4",
+        "building_img": "",
+        "department_name": "Comanche Nation Fair",
+        "website_link": "https://www.comanchenationfair.com/"
+    },
+];
+
+const mapId = [
+  "ap_2500","ap_2100","ap_2000","ap_1800","ap_1500","ap_1400","ap_1300",
+  "ap_1200","ap_1000","ap_800","ap_700","ap_1100","ap_900","ap_400",
+  "ap_500","ap_200","ap_c4","ap_c2","ap_300","ap_c1","ap_600",
+  "ap_1900","ap_c3","ap_100","ap_2300","ap_2400"
+];
+
+document.addEventListener("DOMContentLoaded", () => {
+  // ====== DOM refs ======
+  const ikr_svg        = document.getElementById('ikr_svg');
+  const ikr_rv_detail  = document.getElementById("ikr_rv_detail");
+  const plotIdEl       = document.getElementById("plotId");
+  const mapImgEl       = document.getElementById("map_img");
+  const detailDesEl    = document.getElementById("detail_des");
+  const ikr_map_tooltip= document.getElementById("ikr_map_tooltip");
+  const ikr_btntxt     = document.getElementById("ikr_btnTxt");
+
+  // ====== Helpers ======
+  const PLACEHOLDER_IMG = "https://via.placeholder.com/600x360?text=Building+Photo";
+
+  function formatBuildingTitle(id) {
+  const m = /^ap_(.+)$/i.exec(id);
+
+  if (m && m[1]) {
+    const value = m[1].toLowerCase();
+
+    // Check if the value is one of c1, c2, c3, c4
+    if (["c1", "c2", "c3", "c4"].includes(value)) {
+      return `Site ${m[1].toUpperCase()}`;
+    }
+
+    return `Building ${m[1].toUpperCase()}`;
+  }
+
+  return id.toUpperCase();
+}
+
+
+  // === Detect if device is mobile ===
+  const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  // === Smart positioning for detail panel ===
+  function placeSmartInContainer(el, ev, pad = 8) {
+    el.style.position = "absolute";
+
+    const parent = el.offsetParent || document.body;
+    const rect = parent.getBoundingClientRect();
+
+    const cs = getComputedStyle(parent);
+    const padL = parseFloat(cs.paddingLeft)  || 0;
+    const padT = parseFloat(cs.paddingTop)   || 0;
+    const padR = parseFloat(cs.paddingRight) || 0;
+    const padB = parseFloat(cs.paddingBottom)|| 0;
+
+    const prevDisp = el.style.display;
+    const prevVis  = el.style.visibility;
+    el.style.visibility = "hidden";
+    el.style.display = "block";
+
+    const w = el.offsetWidth;
+    const h = el.offsetHeight;
+
+    const relX = ev.clientX - rect.left - padL;
+    const relY = ev.clientY - rect.top  - padT;
+
+    const contentW = rect.width  - padL - padR;
+    const contentH = rect.height - padT - padB;
+
+    let left = relX + pad;
+    let top  = relY + pad;
+
+    if (left + w > contentW) left = relX - w - pad;
+    left = Math.max(0, Math.min(left, contentW - w));
+
+    if (top + h > contentH) top = relY - h - pad;
+    top = Math.max(0, Math.min(top, contentH - h));
+
+    el.style.left = (left + padL) + "px";
+    el.style.top  = (top  + padT) + "px";
+
+    el.style.visibility = prevVis || "visible";
+    el.style.display = prevDisp || "block";
+  }
+
+  // === Side-aware positioning for tooltip ===
+  function placeSideTooltipInContainer(el, ev, pad = 8) {
+    el.style.position = "absolute";
+
+    const parent = el.offsetParent || document.body;
+    const prect = parent.getBoundingClientRect();
+
+    const cs = getComputedStyle(parent);
+    const padL = parseFloat(cs.paddingLeft)  || 0;
+    const padT = parseFloat(cs.paddingTop)   || 0;
+    const padR = parseFloat(cs.paddingRight) || 0;
+    const padB = parseFloat(cs.paddingBottom)|| 0;
+
+    const prevDisp = el.style.display;
+    const prevVis  = el.style.visibility;
+    el.style.visibility = "hidden";
+    el.style.display = "block";
+
+    const w = el.offsetWidth;
+    const h = el.offsetHeight;
+
+    const relX = ev.clientX - prect.left - padL;
+    const relY = ev.clientY - prect.top  - padT;
+
+    const contentW = prect.width  - padL - padR;
+    const contentH = prect.height - padT - padB;
+
+    const roomRight = contentW - relX;
+    const roomLeft  = relX;
+    const putRight  = roomRight >= roomLeft;
+
+    let left = putRight ? relX + pad : relX - w - pad;
+    let top  = relY - h / 2;
+
+    left = Math.max(0, Math.min(left, contentW - w));
+    top  = Math.max(0, Math.min(top, contentH - h));
+
+    el.style.left = (left + padL) + "px";
+    el.style.top  = (top  + padT) + "px";
+
+    el.style.visibility = prevVis || "visible";
+    el.style.display    = prevDisp || "block";
+  }
+
+  // === Group data by building id ===
+  function groupLotsById(data) {
+    return data.reduce((acc, item) => {
+      if (!acc[item.id]) acc[item.id] = { building_img: item.building_img || "", departments: [] };
+      acc[item.id].departments.push({
+        name: item.department_name || "",
+        link: item.website_link || "",
+        img: item.building_img || ""
+      });
+      if (!acc[item.id].building_img && item.building_img) acc[item.id].building_img = item.building_img;
+      return acc;
+    }, {});
+  }
+  const groupedLots = groupLotsById(lotDetails || []);
+
+  // === Render full detail panel ===
+  function renderDetailPanel(buildingId, ev) {
+    const data = groupedLots[buildingId];
+    if (!data) return;
+console.log(buildingId)
+    plotIdEl.textContent = formatBuildingTitle(buildingId);
+
+    const mainImg = (data.building_img && data.building_img.trim()) ? data.building_img : PLACEHOLDER_IMG;
+    mapImgEl.src = mainImg;
+    mapImgEl.alt = `${formatBuildingTitle(buildingId)} Photo`;
+
+    const html = (data.departments || [])
+      .map(d => {
+        const name = d.name || "";
+        const link = d.link || "";
+        return link
+          ? `<li style="margin:2px 0;"><a href="${link}" target="_blank" rel="noopener">${name}</a></li>`
+          : `<li style="margin:2px 0;">${name}</li>`;
+      })
+      .join("");
+
+    detailDesEl.innerHTML = `<ul style="padding-left:16px;margin:0;">${html}</ul>`;
+
+    ikr_rv_detail.style.display = "block";
+    ikr_btntxt.style.display = "none";
+    placeSmartInContainer(ikr_rv_detail, ev, 12);
+  }
+
+  // ====== Attach events to map nodes ======
+  (mapId || []).forEach((id) => {
+    const node = document.getElementById(id);
+    if (!node) return;
+
+    // Hover: show tooltip only if NOT mobile
+    if (!isMobile) {
+      node.addEventListener("mousemove", (ev) => {
+        const ct = ev.target;
+        ct.style.opacity = "0.3";
+        ct.style.fill = "red";
+        ikr_map_tooltip.textContent = formatBuildingTitle(id);
+        ikr_map_tooltip.style.display = "block";
+        placeSmartInContainer(ikr_map_tooltip, ev, 8);
+        node.style.cursor = "pointer";
+      });
+
+      node.addEventListener("mouseleave", (ev) => {
+        ikr_map_tooltip.style.display = "none";
+        const ct = ev.target;
+        ct.style.opacity = "0";
+      });
+    }
+
+    // Click: always show full detail panel
+    node.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      renderDetailPanel(id, ev);
+    });
+  });
+
+  // Hide detail panel if click outside
+  window.addEventListener("click", (ev) => {
+    const clickedEl = ev.target;
+    if (clickedEl.closest("#ikr_rv_detail")) return;
+
+    const clickedId = clickedEl.id || (clickedEl.parentNode && clickedEl.parentNode.id);
+    if (mapId.includes(clickedId)) return;
+
+    ikr_map_tooltip.style.display = "none";
+    ikr_rv_detail.style.display = "none";
+  });
+
+  // Apply zoom if available
+
+
+
+  function ikrZoom(ikrsvg) {
+  let mouseX;
+  let mouseY;
+  let mouseTX;
+  let mouseTY;
+  let addTransformLavelX = 35;
+  let addTransformLavelY = 10;
+  let isZoom = true;
+  let startX = 0;
+  let startY = 0;
+  let panning = false;
+
+  const ts = {
+    scale: 1,
+    rotate: 0,
+    translate: {
+      x: 0,
+      y: 0,
+    },
+  };
+  var currentScale = 1;
+  var step = 0.2;
+
+
+    // Toolbar buttons (bottom-right)
+const toolbar = document.createElement("div");
+toolbar.style.cssText = `
+  position: absolute; left: 14px; bottom: 16px; z-index: 13;
+  display:flex; gap:8px;
+  border:1px solid rgba(0,0,0,.12); padding:8px; border-radius:10px;
+  box-shadow:0 8px 24px rgba(0,0,0,.12);
+  font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+`;
+   
+// Helper to create buttons
+function makeBtn(label, title, id) {
+  const b = document.createElement("button");
+  b.textContent = label;
+  b.title = title;
+  b.id = id;
+  b.style.cssText = `
+    padding:6px 10px; border-radius:8px; border:1px solid #d0d7de;
+    background:#f6f8fa; cursor:pointer; font-weight:600;
+  `;
+  b.onmouseenter = () => (b.style.background = "#eaeef2");
+  b.onmouseleave = () => (b.style.background = "#f6f8fa");
+  return b;
+}
+
+// Create buttons
+const btnIn = makeBtn("+", "Zoom in", "zoom_in");
+const btnOut = makeBtn("–", "Zoom out", "zoom_out");
+const btnReset = makeBtn("Reset", "Reset view", "reset");
+
+// Attach event handlers (you must define zoomIn, zoomOut, resetView separ10ately)
+
+
+// Append buttons and add toolbar to page
+toolbar.append(btnIn, btnOut, btnReset);
+
+console.log(ikrsvg.parentNode)
+const get_parentNOde = ikrsvg.parentNode;
+if(get_parentNOde){
+console.log(get_parentNOde);
+  get_parentNOde.appendChild(toolbar);
+}
+  const zoomIN = document.getElementById("zoom_in");
+  const zoomOut = document.getElementById("zoom_out");
+  const resets = document.getElementById("reset");
+
+  ikrsvg.style.scrollbarWidth = "none";
+
+  zoomIN.addEventListener("click", (e) => {
+    isZoom = true;
+    currentScale < 8 ? (currentScale += step) : currentScale;
+
+    applyZoom();
+  });
+
+  zoomOut.addEventListener("click", (e) => {
+    isZoom = false;
+    // currentScale > 1?currentScale -= step: currentScale;
+    if (currentScale > 1) {
+      currentScale -= step;
+    } else {
+      currentScale;
+      var transformzoomOut = `translate(${0}px, ${0}px) ${
+        currentScale > 1 ? `scale(${currentScale})` : `scale(1)`
+      }`;
+      ikrsvg.style.transform = transformzoomOut;
+    }
+
+    applyZoom();
+  });
+
+
+
+
+  function applyZoom(e) {
+    var currentStyle = ikrsvg.getAttribute("style");
+    var currentTranslate = parseTranslate(currentStyle);
+    if (currentScale > 1 || currentTranslate.x > 0 || currentTranslate > 0) {
+      resets.addEventListener("click", reset);
+    }
+    // detail.style.display = "none";
+
+    var transform = `translate(${currentTranslate.x}px, ${
+      currentTranslate.y
+    }px) ${currentScale > 1 ? `scale(${currentScale})` : `scale(1)`}`;
+    var transformzoomOut = `translate(${0}px, ${0}px) ${
+      currentScale > 1 ? `scale(${currentScale})` : `scale(1)`
+    }`;
+    ikrsvg.style.transform = transform;
+    // Update the ts object with the currentScale value
+    ts.scale = currentScale;
+  }
+
+  function parseTranslate(style) {
+    var translateRegex = /translate\(([^,]+),([^)]+)\)/;
+    var match = style.match(translateRegex);
+
+    if (match) {
+      return {
+        x: parseFloat(match[1]),
+        y: parseFloat(match[2]),
+      };
+    } else {
+      return { x: 0, y: 0 };
+    }
+  }
+
+  // rotate.oninput = function(event) {
+  //   event.preventDefault();
+  //   ts.rotate = event.target.value;
+  //   setTransform();
+  // };
+
+  // ikrsvg.onwheel = function(event) {
+  //   event.preventDefault();
+  //   //need more handling  to avoid fast scrolls
+  //   console.log(event)
+  //   var func = ikrsvg.onwheel;
+  //   ikrsvg.onwheel = null;
+  //   console.log('hh');
+
+  //   let rec = ikrsvg.getBoundingClientRect();
+  //   let x = (event.clientX - rec.x) / ts.scale;
+  //   let y = (event.clientY - rec.y) / ts.scale;
+
+  //   let delta = (event.wheelDelta ? event.wheelDelta : -event.deltaY);
+  //   ts.scale = (delta > 0) ? (ts.scale + 0.2) : (ts.scale - 0.2);
+
+  //   //let m = (ts.scale - 1) / 2;
+  //   let m = (delta > 0) ? 0.1 : -0.1;
+  //   ts.translate.x += (-x * m * 2) + (ikrsvg.offsetWidth * m);
+  //   ts.translate.y += (-y * m * 2) + (ikrsvg.offsetHeight * m);
+
+  //   setTransform();
+  //   ikrsvg.onwheel = func;
+  // };
+
+  function getTheMouseDownCordenet(event) {
+    event.preventDefault();
+    panning = true;
+
+    ikrsvg.style.cursor = "grabbing";
+    mouseX = event.clientX;
+    mouseY = event.clientY;
+    mouseTX = ts.translate.x;
+    mouseTY = ts.translate.y;
+  }
+
+  function isMobile() {
+    const regex = /Mobi|Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i;
+    return regex.test(navigator.userAgent);
+  }
+  
+  if (isMobile()) {
+   
+
+
+let touchIdentifier;
+let touchStartX;
+let touchStartY;
+let touchStartTX;
+let touchStartTY;
+let panning = false;
+let currentScale = 1;
+const step = 0.2;
+
+const ts = {
+  scale: 1,
+  rotate: 0,
+  translate: {
+    x: 0,
+    y: 0
+  }
+};
+
+function applyZoom() {
+  const transform = `translate(${ts.translate.x}px, ${ts.translate.y}px) scale(${currentScale})`;
+  ikrsvg.style.transform = transform;
+}
+
+ikrsvg.addEventListener('touchstart', (e) => {
+  if (e.touches.length === 1) {
+    touchIdentifier = e.touches[0].identifier;
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    touchStartTX = ts.translate.x;
+    touchStartTY = ts.translate.y;
+  } else {
+    panning = true;
+    const touch1 = e.touches[0];
+    const touch2 = e.touches[1];
+    touchStartX = (touch1.clientX + touch2.clientX) / 2;
+    touchStartY = (touch1.clientY + touch2.clientY) / 2;
+  }
+});
+
+ikrsvg.addEventListener('touchmove', (e) => {
+  // e.preventDefault();
+  if (panning) {
+    const touch1 = e.touches[0];
+    const touch2 = e.touches[1];
+    const touchCurrentX = (touch1.clientX + touch2.clientX) / 2;
+    const touchCurrentY = (touch1.clientY + touch2.clientY) / 2;
+
+    ts.translate.x = touchStartTX + (touchCurrentX - touchStartX);
+    ts.translate.y = touchStartTY + (touchCurrentY - touchStartY);
+
+    applyZoom();
+  } else if (e.touches.length === 1 && e.touches[0].identifier === touchIdentifier) {
+    const touchCurrentX = e.touches[0].clientX;
+    const touchCurrentY = e.touches[0].clientY;
+
+    ts.translate.x = touchStartTX + (touchCurrentX - touchStartX);
+    ts.translate.y = touchStartTY + (touchCurrentY - touchStartY);
+
+    applyZoom();
+  }
+});
+
+ikrsvg.addEventListener('touchend', () => {
+  panning = false;
+  touchIdentifier = null;
+});
+
+const zoomIn = document.getElementById('zoom_in');
+const zoomOut = document.getElementById('zoom_out');
+const resets = document.getElementById('reset');
+
+zoomIn.addEventListener('click', () => {
+  currentScale < 8 ? (currentScale += step) : currentScale;
+  applyZoom();
+});
+
+zoomOut.addEventListener('click', () => {
+  if (currentScale > 1) {
+    currentScale -= step;
+  } else {
+    currentScale = 1;
+  }
+  applyZoom();
+});
+
+resets.addEventListener('click', () => {
+  currentScale = 1;
+  ts.translate = { x: 0, y: 0 };
+  applyZoom();
+});
+
+applyZoom();
+
+  } else {
+    console.log("Desktop device detected");
+  }
+
+
+
+
+  ikrsvg.addEventListener("mousedown", getTheMouseDownCordenet);
+
+  ikrsvg.onmouseup = function (event) {
+    panning = false;
+    ikrsvg.style.cursor = "grab";
+  };
+  ikrsvg.onmouseout = function (event) {
+    panning = false;
+    ikrsvg.style.cursor = "auto";
+  };
+
+  ikrsvg.onmousemove = function (event) {
+    event.preventDefault();
+    let rec = ikrsvg.getBoundingClientRect();
+    let xx = event.clientX - rec.x;
+    let xy = event.clientY - rec.y;
+
+    const x = event.clientX;
+    const y = event.clientY;
+    pointX = x - startX;
+    pointY = y - startY;
+    if (!panning) {
+      return;
+    }
+    ts.translate.x = mouseTX + (x - mouseX);
+    ts.translate.y = mouseTY + (y - mouseY);
+    setTransform();
+  };
+
+  function setTransform() {
+    const steps = `translate(${ts.translate.x}px,${ts.translate.y}px) scale(${ts.scale}) rotate(${ts.rotate}deg) translate3d(0,0,0)`;
+    //console.log(steps);
+    ikrsvg.style.transform = steps;
+  }
+
+  function reset() {
+    ts.scale = 1;
+    currentScale = 1;
+    ts.translate = {
+      x: 0,
+      y: 0,
+    };
+
+    ikrsvg.style.transform = "none";
+  }
+
+  setTransform();
+}
+
+  const svg = document.getElementById("ikr_svg");
+  if (svg && typeof ikrZoom === "function") {
+    ikrZoom(svg);
+  }
+});
+
+    </script>
+</body>
+</html>
